@@ -1,10 +1,36 @@
 const fs = require('fs').promises;
 
-minDiffer = 1;
-maxDiffer = 3;
-
 fs.readFile('input2.txt', 'utf-8')
     .then((text) => {
+        function processData(a, b, c, d, e) {
+            if (d == 2) return false;
+
+            if (Array.isArray(a) && a.length > 1) {
+                if (c === true) {
+                    if (a[b + 1] > a[b] && a[b] - a[b + 1] >= -3) {
+                        deletes.push(a.shift())
+                        console.log(deletes)
+                        return processData(a, 0, true, d, deletes)
+                    }
+                    a.shift()
+                    d++
+                    if (d == 2) return false;
+                    return processData(deletes.concat(a), 0, true, d, deletes)
+                } else if (c === false) {
+                    if (a[b + 1] < a[b] && a[b] - a[b + 1] <= 3) {
+                        deletes.push(a.shift())
+                        console.log(deletes)
+                        return processData(a, 0, false, d, deletes)
+                    }
+                    a.shift()
+                    d++
+                    if (d == 2) return false;
+                    return processData(deletes.concat(a), 0, true, d)
+                }
+            }
+            return true;
+        }
+
         let allInputs = text.replace(/\s/g, ";");
         allInputs = allInputs.replace(/;;/g, ",");
         allInputs = allInputs.split(",")
@@ -16,39 +42,14 @@ fs.readFile('input2.txt', 'utf-8')
         }
 
         let safe = 0;
-        let isSafe = false;
-        let increasing = undefined;
 
         for (var i = 0; i < newAllInputs.length; i++) {
             if (newAllInputs[i][0] < newAllInputs[i][1]) {
-                increasing = true;
+                safe += processData(newAllInputs[i], 0, true) ? 1 : 0
             } else if (newAllInputs[i][0] > newAllInputs[i][1]) {
-                increasing = false;
-            } else {
-                increasing = undefined;
+                safe += processData(newAllInputs[i], 0, false) ? 1 : 0
             }
-            for (let index = 1; index < newAllInputs[i].length - 1; index++) {
-                isSafe = false;
-                if (increasing === true) {
-                    if (newAllInputs[i][index] - newAllInputs[i][index + 1] < -3 ||
-                        newAllInputs[i][index] >= newAllInputs[i][index + 1]
-                    ) {
-                        break
-                    }
-                } else if (increasing === false) {
-                    if (newAllInputs[i][index] - newAllInputs[i][index + 1] > 3 ||
-                        newAllInputs[i][index] <= newAllInputs[i][index + 1]
-                    ) {
-                        break
-                    }
-                } else {
-                    break
-                }
-                isSafe = true
-            }
-            if (isSafe === true) {
-                safe++
-            }
-            console.log(safe)
         }
+
+        console.log(safe)
     })
